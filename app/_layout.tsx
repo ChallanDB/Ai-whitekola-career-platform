@@ -4,60 +4,31 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useSettingsStore } from '@/store/settingsStore';
-import { onAuthStateChanged } from 'firebase/auth';
 import { useAuthStore } from '@/store/authStore';
-import { getUserData } from '@/utils/firebase';
-import { auth } from '@/config/firebase';
+import Colors from '@/constants/colors';
+
+// Import Firebase config to ensure it's initialized early
+import '@/config/firebase';
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { darkMode } = useSettingsStore();
-  const { setUser, setIsAuthenticated, setIsLoading } = useAuthStore();
+  const { setIsLoading } = useAuthStore();
   
   const [fontsLoaded] = useFonts({
     'Inter-Regular': require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ttf'),
   });
 
   useEffect(() => {
-    // Listen for authentication state changes
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setIsLoading(true);
-      
-      if (firebaseUser) {
-        try {
-          // Get additional user data from Firestore
-          const userData = await getUserData(firebaseUser.uid);
-          
-          if (userData) {
-            setUser(userData);
-            setIsAuthenticated(true);
-          } else {
-            // If no user data in Firestore, create basic user object
-            setUser({
-              id: firebaseUser.uid,
-              email: firebaseUser.email || '',
-              username: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-              photoURL: firebaseUser.photoURL || undefined,
-              hasCV: false
-            });
-            setIsAuthenticated(true);
-          }
-        } catch (error) {
-          console.error('Error getting user data:', error);
-          setUser(null);
-          setIsAuthenticated(false);
-        }
-      } else {
-        setUser(null);
-        setIsAuthenticated(false);
-      }
-      
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
+    // Set initial loading state
+    setIsLoading(true);
+    
+    // Listen for authentication state changes will be handled in auth store
+    
+    // Set loading to false after initialization
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -76,7 +47,7 @@ export default function RootLayout() {
       <Stack screenOptions={{
         headerShown: false,
         contentStyle: {
-          backgroundColor: darkMode ? '#121212' : '#FFFFFF',
+          backgroundColor: darkMode ? Colors.dark.background : Colors.background,
         },
       }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />

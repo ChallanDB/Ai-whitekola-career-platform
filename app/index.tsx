@@ -5,12 +5,18 @@ import { useAuthStore } from '@/store/authStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import Colors from '@/constants/colors';
 
+// Import Firebase config to ensure it's initialized early
+import '@/config/firebase';
+
 export default function Index() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuthStore();
   const { hasCompletedOnboarding } = useOnboardingStore();
 
   useEffect(() => {
+    // Wait for auth to initialize
+    if (isLoading) return;
+    
     // Simulate a loading delay
     const timer = setTimeout(() => {
       if (!hasCompletedOnboarding) {
@@ -23,7 +29,7 @@ export default function Index() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [hasCompletedOnboarding, isAuthenticated, router]);
+  }, [hasCompletedOnboarding, isAuthenticated, isLoading, router]);
 
   return (
     <View style={styles.container}>
