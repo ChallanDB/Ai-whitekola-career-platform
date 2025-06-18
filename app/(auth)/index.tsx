@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -19,7 +20,7 @@ import { signIn, signUp, resetPassword } from '@/utils/firebase';
 
 export default function AuthScreen() {
   const router = useRouter();
-  const { setUser, setIsAuthenticated, setIsLoading, setError } = useAuthStore();
+  const { setUser, setIsAuthenticated } = useAuthStore();
   
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -93,25 +94,25 @@ export default function AuthScreen() {
     try {
       if (isLogin) {
         // Login
-        const user = await signIn(email, password);
+        const firebaseUser = await signIn(email, password);
         
-        // Get user data from Firestore
         setUser({
-          id: user.uid,
-          email: user.email || '',
-          username: user.displayName || email.split('@')[0],
-          hasCV: false, // This should be fetched from Firestore in a real app
+          id: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          username: firebaseUser.displayName || email.split('@')[0],
+          photoURL: firebaseUser.photoURL || undefined,
+          hasCV: false // This will be updated when we fetch user data
         });
         
         setIsAuthenticated(true);
         router.replace('/(tabs)');
       } else {
         // Sign up
-        const user = await signUp(email, password, username);
+        const firebaseUser = await signUp(email, password, username);
         
         setUser({
-          id: user.uid,
-          email: user.email || '',
+          id: firebaseUser.uid,
+          email: firebaseUser.email || '',
           username: username,
           hasCV: false,
         });
@@ -141,10 +142,10 @@ export default function AuthScreen() {
     setLoading(true);
     try {
       await resetPassword(email);
-      setErrors({
-        ...errors,
-        general: 'Password reset email sent. Please check your inbox.',
-      });
+      Alert.alert(
+        'Password Reset',
+        'Password reset email sent. Please check your inbox.'
+      );
     } catch (error: any) {
       setErrors({
         ...errors,

@@ -18,12 +18,12 @@ import { useSettingsStore } from '@/store/settingsStore';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 import Colors from '@/constants/colors';
-import { createDocument, uploadFile } from '@/utils/firebase';
+import { createDocument, updateUserData } from '@/utils/firebase';
 import { generatePDF } from '@/utils/pdfGenerator';
 
 export default function CreateCVScreen() {
   const router = useRouter();
-  const { user, setUser } = useAuthStore();
+  const { user, updateUser } = useAuthStore();
   const { darkMode } = useSettingsStore();
   
   const [photo, setPhoto] = useState<string | null>(null);
@@ -244,18 +244,20 @@ export default function CreateCVScreen() {
       return;
     }
     
+    if (!user?.id) {
+      Alert.alert('Error', 'You must be logged in to create a CV');
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
-      // In a real app, upload photo to Firebase Storage
-      // const photoURL = await uploadFile(`users/${user?.id}/profile.jpg`, photo);
-      
       // For demo, we'll use the direct URL
       const photoURL = photo || '';
       
       // Create CV object
       const cvData = {
-        userId: user?.id,
+        userId: user.id,
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -267,21 +269,16 @@ export default function CreateCVScreen() {
         skills: formData.skills.filter(skill => skill.trim() !== ''),
         certifications: formData.certifications,
         references: formData.references,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
       };
       
       // Save CV to Firestore
-      const cvId = await createDocument('cvs', cvData, user?.id || null);
+      const cvId = await createDocument('cvs', cvData);
       
       // Update user to indicate they have a CV
-      await createDocument('users', { hasCV: true }, user?.id || null);
+      await updateUserData(user.id, { hasCV: true });
       
       // Update local user state
-      setUser({
-        ...user!,
-        hasCV: true,
-      });
+      updateUser({ hasCV: true });
       
       // Store CV for download
       setCV({ id: cvId, ...cvData });

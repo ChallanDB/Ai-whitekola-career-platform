@@ -19,6 +19,7 @@ import Button from '@/components/Button';
 import Colors from '@/constants/colors';
 import { jobSectors, jobTypes, cameroonLocations } from '@/utils/mockData';
 import { Job } from '@/types';
+import { createDocument } from '@/utils/firebase';
 
 export default function PostJobScreen() {
   const router = useRouter();
@@ -120,11 +121,16 @@ export default function PostJobScreen() {
   const handleSubmit = async () => {
     if (!validateForm()) return;
     
+    if (!user?.id) {
+      Alert.alert('Error', 'You must be logged in to post a job');
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
       // Prepare job data
-      const jobData: Omit<Job, 'id' | 'postedAt' | 'isPriority'> = {
+      const jobData: Omit<Job, 'id'> = {
         title: formData.title,
         company: formData.company,
         description: formData.description,
@@ -133,14 +139,19 @@ export default function PostJobScreen() {
         sector: formData.sector,
         salary: formData.salary,
         deadline: formData.deadline,
-        postedBy: user?.id || 'anonymous',
+        postedBy: user.id,
+        postedAt: Date.now(),
         applicationType: formData.applicationType,
         applicationLink: formData.applicationLink,
         isExternal: formData.applicationType === 'external',
+        isPriority: true,
         source: 'WhiteKola'
       };
       
-      // Post job to Firestore
+      // Save job to Firestore
+      await createDocument('jobs', jobData);
+      
+      // Update local state
       await postJob(jobData);
       
       Alert.alert(

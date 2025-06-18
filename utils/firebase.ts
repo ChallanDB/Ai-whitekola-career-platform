@@ -1,353 +1,227 @@
-// Firebase configuration and mock implementations
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import { initializeApp } from 'firebase/app';
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signOut,
+  updateProfile,
+  User as FirebaseUser
+} from 'firebase/auth';
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  updateDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  deleteDoc,
+  serverTimestamp,
+  Timestamp
+} from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { User } from '@/types';
 
-// Your web app's Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDq7vEg7cInP8D4tIEJrj3HuhTwZrzN7vw",
   authDomain: "whitekola-47d90.firebaseapp.com",
   projectId: "whitekola-47d90",
-  storageBucket: "whitekola-47d90.firebasestorage.app",
+  storageBucket: "whitekola-47d90.appspot.com",
   messagingSenderId: "1067071420460",
   appId: "1:1067071420460:web:c4f48436f0be1f07be7989"
 };
 
 // Initialize Firebase
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 const storage = getStorage(app);
 
-// Setup localStorage for web or AsyncStorage for mobile
-const getLocalStorage = () => {
-  if (Platform.OS === 'web') {
-    return window.localStorage;
-  } else {
-    return {
-      getItem: async (key: string) => {
-        try {
-          return await AsyncStorage.getItem(key);
-        } catch (e) {
-          return null;
-        }
-      },
-      setItem: async (key: string, value: string) => {
-        try {
-          await AsyncStorage.setItem(key, value);
-        } catch (e) {
-          console.error('Error storing value', e);
-        }
-      },
-      removeItem: async (key: string) => {
-        try {
-          await AsyncStorage.removeItem(key);
-        } catch (e) {
-          console.error('Error removing value', e);
-        }
-      }
-    };
+// Authentication functions
+export const signIn = async (email: string, password: string): Promise<FirebaseUser> => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error: any) {
+    console.error('Error signing in:', error);
+    throw new Error(error.message || 'Failed to sign in');
   }
 };
 
-// Mock auth functions using local storage
-const signIn = async (email: string, password: string) => {
+export const signUp = async (email: string, password: string, username: string): Promise<FirebaseUser> => {
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     
-    // Check if user exists in local storage
-    const storage = getLocalStorage();
-    const usersString = await storage.getItem('users');
-    const users = usersString ? JSON.parse(usersString) : [];
-    
-    const user = users.find((u: any) => u.email === email && u.password === password);
-    
-    if (!user) {
-      throw new Error('Invalid email or password');
-    }
-    
-    return {
-      uid: user.id,
-      email: user.email,
-      displayName: user.username
-    };
-  } catch (error) {
-    throw error;
-  }
-};
-
-const signUp = async (email: string, password: string, username: string) => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if user already exists
-    const storage = getLocalStorage();
-    const usersString = await storage.getItem('users');
-    const users = usersString ? JSON.parse(usersString) : [];
-    
-    if (users.some((u: any) => u.email === email)) {
-      throw new Error('Email already in use');
-    }
-    
-    // Create new user
-    const newUser = {
-      id: Date.now().toString(),
-      email,
-      password,
-      username,
-      hasCV: false,
-      createdAt: Date.now()
-    };
-    
-    // Save to local storage
-    await storage.setItem('users', JSON.stringify([...users, newUser]));
-    
-    return {
-      uid: newUser.id,
-      email: newUser.email,
-      displayName: newUser.username
-    };
-  } catch (error) {
-    throw error;
-  }
-};
-
-const resetPassword = async (email: string) => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if user exists
-    const storage = getLocalStorage();
-    const usersString = await storage.getItem('users');
-    const users = usersString ? JSON.parse(usersString) : [];
-    
-    const user = users.find((u: any) => u.email === email);
-    
-    if (!user) {
-      throw new Error('User not found');
-    }
-    
-    // In a real app, this would send an email
-    console.log(`Password reset email sent to ${email}`);
-    
-    return true;
-  } catch (error) {
-    throw error;
-  }
-};
-
-const logOut = async () => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return true;
-  } catch (error) {
-    throw error;
-  }
-};
-
-// Mock Firestore functions
-const createDocument = async (collectionName: string, data: any, id: string | null = null) => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const storage = getLocalStorage();
-    const collectionString = await storage.getItem(collectionName);
-    const collection = collectionString ? JSON.parse(collectionString) : [];
-    
-    const docId = id || Date.now().toString();
-    const newDoc = {
-      id: docId,
-      ...data,
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-    
-    await storage.setItem(collectionName, JSON.stringify([...collection, newDoc]));
-    
-    return docId;
-  } catch (error) {
-    throw error;
-  }
-};
-
-const updateDocument = async (collectionName: string, id: string, data: any) => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const storage = getLocalStorage();
-    const collectionString = await storage.getItem(collectionName);
-    const collection = collectionString ? JSON.parse(collectionString) : [];
-    
-    const updatedCollection = collection.map((doc: any) => {
-      if (doc.id === id) {
-        return {
-          ...doc,
-          ...data,
-          updatedAt: Date.now()
-        };
-      }
-      return doc;
+    // Update profile with username
+    await updateProfile(userCredential.user, {
+      displayName: username
     });
     
-    await storage.setItem(collectionName, JSON.stringify(updatedCollection));
+    // Create user document in Firestore
+    await setDoc(doc(firestore, 'users', userCredential.user.uid), {
+      email,
+      username,
+      hasCV: false,
+      createdAt: serverTimestamp()
+    });
     
-    return true;
-  } catch (error) {
-    throw error;
+    return userCredential.user;
+  } catch (error: any) {
+    console.error('Error signing up:', error);
+    throw new Error(error.message || 'Failed to sign up');
   }
 };
 
-const deleteDocument = async (collectionName: string, id: string) => {
+export const resetPassword = async (email: string): Promise<void> => {
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const storage = getLocalStorage();
-    const collectionString = await storage.getItem(collectionName);
-    const collection = collectionString ? JSON.parse(collectionString) : [];
-    
-    const updatedCollection = collection.filter((doc: any) => doc.id !== id);
-    
-    await storage.setItem(collectionName, JSON.stringify(updatedCollection));
-    
-    return true;
-  } catch (error) {
-    throw error;
+    await sendPasswordResetEmail(auth, email);
+  } catch (error: any) {
+    console.error('Error resetting password:', error);
+    throw new Error(error.message || 'Failed to reset password');
   }
 };
 
-const getDocument = async (collectionName: string, id: string) => {
+export const logOut = async (): Promise<void> => {
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const storage = getLocalStorage();
-    const collectionString = await storage.getItem(collectionName);
-    const collection = collectionString ? JSON.parse(collectionString) : [];
-    
-    const doc = collection.find((d: any) => d.id === id);
-    
-    return doc || null;
-  } catch (error) {
-    throw error;
+    await signOut(auth);
+  } catch (error: any) {
+    console.error('Error signing out:', error);
+    throw new Error(error.message || 'Failed to sign out');
   }
 };
 
-interface QueryCondition {
-  field: string;
-  operator: string;
-  value: any;
-}
+// Firestore functions
+export const getUserData = async (userId: string): Promise<User | null> => {
+  try {
+    const userDoc = await getDoc(doc(firestore, 'users', userId));
+    
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      return {
+        id: userId,
+        email: userData.email,
+        username: userData.username,
+        photoURL: userData.photoURL,
+        hasCV: userData.hasCV || false
+      };
+    }
+    
+    return null;
+  } catch (error: any) {
+    console.error('Error getting user data:', error);
+    throw new Error(error.message || 'Failed to get user data');
+  }
+};
 
-interface SortOption {
-  field: string;
-  direction: 'asc' | 'desc';
-}
+export const updateUserData = async (userId: string, data: Partial<User>): Promise<void> => {
+  try {
+    await updateDoc(doc(firestore, 'users', userId), {
+      ...data,
+      updatedAt: serverTimestamp()
+    });
+  } catch (error: any) {
+    console.error('Error updating user data:', error);
+    throw new Error(error.message || 'Failed to update user data');
+  }
+};
 
-const getDocuments = async (
+// Storage functions
+export const uploadFile = async (path: string, file: Blob): Promise<string> => {
+  try {
+    const storageRef = ref(storage, path);
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
+  } catch (error: any) {
+    console.error('Error uploading file:', error);
+    throw new Error(error.message || 'Failed to upload file');
+  }
+};
+
+export const deleteFile = async (path: string): Promise<void> => {
+  try {
+    const storageRef = ref(storage, path);
+    await deleteObject(storageRef);
+  } catch (error: any) {
+    console.error('Error deleting file:', error);
+    throw new Error(error.message || 'Failed to delete file');
+  }
+};
+
+// Generic document functions
+export const createDocument = async <T>(
   collectionName: string, 
-  conditions: QueryCondition[] = [], 
-  sortBy: SortOption | null = null
-) => {
+  data: T, 
+  id?: string
+): Promise<string> => {
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const docRef = id 
+      ? doc(firestore, collectionName, id) 
+      : doc(collection(firestore, collectionName));
     
-    const storage = getLocalStorage();
-    const collectionString = await storage.getItem(collectionName);
-    let documents = collectionString ? JSON.parse(collectionString) : [];
+    await setDoc(docRef, {
+      ...data,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
     
-    // Apply conditions
-    if (conditions.length > 0) {
-      documents = documents.filter((doc: any) => {
-        return conditions.every(condition => {
-          const { field, operator, value } = condition;
-          
-          switch (operator) {
-            case '==':
-              return doc[field] === value;
-            case '!=':
-              return doc[field] !== value;
-            case '>':
-              return doc[field] > value;
-            case '>=':
-              return doc[field] >= value;
-            case '<':
-              return doc[field] < value;
-            case '<=':
-              return doc[field] <= value;
-            default:
-              return true;
-          }
-        });
-      });
+    return docRef.id;
+  } catch (error: any) {
+    console.error(`Error creating document in ${collectionName}:`, error);
+    throw new Error(error.message || `Failed to create document in ${collectionName}`);
+  }
+};
+
+export const updateDocument = async <T>(
+  collectionName: string, 
+  id: string, 
+  data: Partial<T>
+): Promise<void> => {
+  try {
+    await updateDoc(doc(firestore, collectionName, id), {
+      ...data,
+      updatedAt: serverTimestamp()
+    });
+  } catch (error: any) {
+    console.error(`Error updating document in ${collectionName}:`, error);
+    throw new Error(error.message || `Failed to update document in ${collectionName}`);
+  }
+};
+
+export const getDocument = async <T>(
+  collectionName: string, 
+  id: string
+): Promise<T | null> => {
+  try {
+    const docSnap = await getDoc(doc(firestore, collectionName, id));
+    
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as T;
     }
     
-    // Apply sorting
-    if (sortBy) {
-      documents.sort((a: any, b: any) => {
-        if (sortBy.direction === 'asc') {
-          return a[sortBy.field] > b[sortBy.field] ? 1 : -1;
-        } else {
-          return a[sortBy.field] < b[sortBy.field] ? 1 : -1;
-        }
-      });
-    }
-    
-    return documents;
-  } catch (error) {
-    throw error;
+    return null;
+  } catch (error: any) {
+    console.error(`Error getting document from ${collectionName}:`, error);
+    throw new Error(error.message || `Failed to get document from ${collectionName}`);
   }
 };
 
-// Mock Storage functions
-const uploadFile = async (path: string, file: any) => {
+export const deleteDocument = async (
+  collectionName: string, 
+  id: string
+): Promise<void> => {
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // In a real app, this would upload to Firebase Storage
-    // For now, just return a mock URL
-    return `https://firebasestorage.example.com/${path}`;
-  } catch (error) {
-    throw error;
+    await deleteDoc(doc(firestore, collectionName, id));
+  } catch (error: any) {
+    console.error(`Error deleting document from ${collectionName}:`, error);
+    throw new Error(error.message || `Failed to delete document from ${collectionName}`);
   }
 };
 
-const deleteFile = async (path: string) => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // In a real app, this would delete from Firebase Storage
-    return true;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export {
-  auth,
-  firestore,
-  storage,
-  signIn,
-  signUp,
-  resetPassword,
-  logOut,
-  createDocument,
-  updateDocument,
-  deleteDocument,
-  getDocument,
-  getDocuments,
-  uploadFile,
-  deleteFile
-};
+export { auth, firestore, storage };
