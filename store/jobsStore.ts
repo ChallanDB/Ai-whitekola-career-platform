@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 import { Job } from '@/types';
 import { fetchLinkedInJobs } from '@/utils/mockData';
-import { createDocument, getDocuments } from '@/utils/firebase';
-import { DocumentData } from 'firebase/firestore';
 
 interface JobsState {
   jobs: Job[];

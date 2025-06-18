@@ -25,7 +25,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import Colors from '@/constants/colors';
 import Button from '@/components/Button';
-import { auth } from '@/utils/firebase';
+import { logOut } from '@/utils/firebase';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -59,16 +59,16 @@ export default function ProfileScreen() {
   const handleHelpSupport = () => {
     Alert.alert(
       'Help & Support',
-      'For assistance, please contact us at akum.binda22@gmail.com',
+      'For assistance, please contact us at support@whitekola.com',
       [{ text: 'OK' }]
     );
   };
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await logOut();
       logout();
-      router.replace('/auth');
+      router.replace('/(auth)');
     } catch (error) {
       console.error('Error logging out:', error);
     }

@@ -58,7 +58,7 @@ export default function Onboarding() {
 
   const completeOnboarding = () => {
     setHasCompletedOnboarding(true);
-    router.replace('/auth');
+    router.replace('/(auth)');
   };
 
   return (

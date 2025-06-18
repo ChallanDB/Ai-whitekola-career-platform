@@ -50,7 +50,7 @@ export default function RootLayout() {
       }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="auth/index" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="job/[id]" options={{ headerShown: true, title: 'Job Details' }} />
         <Stack.Screen name="job/post" options={{ headerShown: true, title: 'Post a Job' }} />

@@ -16,7 +16,7 @@ export default function Index() {
       if (!hasCompletedOnboarding) {
         router.replace('/onboarding');
       } else if (!isAuthenticated) {
-        router.replace('/auth/index');
+        router.replace('/(auth)');
       } else {
         router.replace('/(tabs)');
       }
