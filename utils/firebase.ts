@@ -1,6 +1,4 @@
-import { initializeApp } from 'firebase/app';
 import { 
-  getAuth, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
@@ -9,7 +7,6 @@ import {
   User as FirebaseUser
 } from 'firebase/auth';
 import { 
-  getFirestore, 
   collection, 
   doc, 
   setDoc, 
@@ -24,24 +21,9 @@ import {
   serverTimestamp,
   Timestamp
 } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { User } from '@/types';
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDq7vEg7cInP8D4tIEJrj3HuhTwZrzN7vw",
-  authDomain: "whitekola-47d90.firebaseapp.com",
-  projectId: "whitekola-47d90",
-  storageBucket: "whitekola-47d90.appspot.com",
-  messagingSenderId: "1067071420460",
-  appId: "1:1067071420460:web:c4f48436f0be1f07be7989"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const firestore = getFirestore(app);
-const storage = getStorage(app);
+import { auth, firestore, storage } from '@/config/firebase';
 
 // Authentication functions
 export const signIn = async (email: string, password: string): Promise<FirebaseUser> => {
@@ -223,5 +205,3 @@ export const deleteDocument = async (
     throw new Error(error.message || `Failed to delete document from ${collectionName}`);
   }
 };
-
-export { auth, firestore, storage };

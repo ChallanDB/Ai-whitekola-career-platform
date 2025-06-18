@@ -4,24 +4,10 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useSettingsStore } from '@/store/settingsStore';
-import { initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { useAuthStore } from '@/store/authStore';
 import { getUserData } from '@/utils/firebase';
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDq7vEg7cInP8D4tIEJrj3HuhTwZrzN7vw",
-  authDomain: "whitekola-47d90.firebaseapp.com",
-  projectId: "whitekola-47d90",
-  storageBucket: "whitekola-47d90.appspot.com",
-  messagingSenderId: "1067071420460",
-  appId: "1:1067071420460:web:c4f48436f0be1f07be7989"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+import { auth } from '@/config/firebase';
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
