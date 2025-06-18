@@ -17,7 +17,7 @@ interface AuthState {
   setError: (error: string | null) => void;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
-  initAuth: () => void;
+  initAuth: () => () => void; // Fixed return type to match unsubscribe function
 }
 
 export const useAuthStore = create<AuthState>()(
