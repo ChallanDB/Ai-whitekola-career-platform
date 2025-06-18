@@ -14,8 +14,6 @@ export default function AuthLayout() {
           backgroundColor: darkMode ? Colors.dark.background : Colors.background,
         },
       }}
-    >
-      <Stack.Screen name="index" />
-    </Stack>
+    />
   );
 }
