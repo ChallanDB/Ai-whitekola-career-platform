@@ -6,7 +6,7 @@ import {
   FlatList, 
   TextInput, 
   TouchableOpacity, 
-  Share as RNShare,
+  Share,
   Alert,
   RefreshControl,
 } from 'react-native';
@@ -75,7 +75,7 @@ export default function HomeScreen() {
 
   const handleShareJob = async (job: any) => {
     try {
-      await RNShare.share({
+      await Share.share({
         message: `Check out this job: ${job.title} at ${job.company}. ${job.description}`,
         title: `${job.title} - ${job.company}`,
       });
