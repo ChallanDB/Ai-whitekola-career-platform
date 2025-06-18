@@ -56,6 +56,7 @@ export default function RootLayout() {
         <Stack.Screen name="job/post" options={{ headerShown: true, title: 'Post a Job' }} />
         <Stack.Screen name="cv/create" options={{ headerShown: true, title: 'Create CV' }} />
         <Stack.Screen name="counseling/book" options={{ headerShown: true, title: 'Book Counseling' }} />
+        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </>
   );
