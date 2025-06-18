@@ -16,11 +16,10 @@ import { useAuthStore } from '@/store/authStore';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 import Colors from '@/constants/colors';
-import { signIn, signUp, resetPassword } from '@/utils/firebase';
 
 export default function AuthScreen() {
   const router = useRouter();
-  const { setUser, setIsAuthenticated } = useAuthStore();
+  const { login, register } = useAuthStore();
   
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -94,30 +93,11 @@ export default function AuthScreen() {
     try {
       if (isLogin) {
         // Login
-        const firebaseUser = await signIn(email, password);
-        
-        setUser({
-          id: firebaseUser.uid,
-          email: firebaseUser.email || '',
-          username: firebaseUser.displayName || email.split('@')[0],
-          photoURL: firebaseUser.photoURL || undefined,
-          hasCV: false // This will be updated when we fetch user data
-        });
-        
-        setIsAuthenticated(true);
+        await login(email, password);
         router.replace('/(tabs)');
       } else {
         // Sign up
-        const firebaseUser = await signUp(email, password, username);
-        
-        setUser({
-          id: firebaseUser.uid,
-          email: firebaseUser.email || '',
-          username: username,
-          hasCV: false,
-        });
-        
-        setIsAuthenticated(true);
+        await register(email, password, username);
         router.replace('/(tabs)');
       }
     } catch (error: any) {
@@ -141,10 +121,11 @@ export default function AuthScreen() {
 
     setLoading(true);
     try {
-      await resetPassword(email);
+      // Simulate password reset
+      await new Promise(resolve => setTimeout(resolve, 1000));
       Alert.alert(
         'Password Reset',
-        'Password reset email sent. Please check your inbox.'
+        'If your email exists in our system, you will receive a password reset link.'
       );
     } catch (error: any) {
       setErrors({

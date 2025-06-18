@@ -18,7 +18,6 @@ import { useSettingsStore } from '@/store/settingsStore';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 import Colors from '@/constants/colors';
-import { createDocument, updateUserData } from '@/utils/firebase';
 import { generatePDF } from '@/utils/pdfGenerator';
 
 export default function CreateCVScreen() {
@@ -271,17 +270,11 @@ export default function CreateCVScreen() {
         references: formData.references,
       };
       
-      // Save CV to Firestore
-      const cvId = await createDocument('cvs', cvData);
+      // Store CV for download
+      setCV({ id: Date.now().toString(), ...cvData });
       
       // Update user to indicate they have a CV
-      await updateUserData(user.id, { hasCV: true });
-      
-      // Update local user state
       updateUser({ hasCV: true });
-      
-      // Store CV for download
-      setCV({ id: cvId, ...cvData });
       
       Alert.alert(
         'Success',

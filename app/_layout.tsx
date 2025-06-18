@@ -7,9 +7,6 @@ import { useSettingsStore } from '@/store/settingsStore';
 import { useAuthStore } from '@/store/authStore';
 import Colors from '@/constants/colors';
 
-// Import Firebase config to ensure it's initialized early
-import '@/config/firebase';
-
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
@@ -24,8 +21,6 @@ export default function RootLayout() {
   useEffect(() => {
     // Set initial loading state
     setIsLoading(true);
-    
-    // Listen for authentication state changes will be handled in auth store
     
     // Set loading to false after initialization
     setIsLoading(false);

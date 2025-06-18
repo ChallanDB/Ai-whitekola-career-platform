@@ -19,7 +19,6 @@ import Button from '@/components/Button';
 import Colors from '@/constants/colors';
 import { jobSectors, jobTypes, cameroonLocations } from '@/utils/mockData';
 import { Job } from '@/types';
-import { createDocument } from '@/utils/firebase';
 
 export default function PostJobScreen() {
   const router = useRouter();
@@ -147,9 +146,6 @@ export default function PostJobScreen() {
         isPriority: true,
         source: 'WhiteKola'
       };
-      
-      // Save job to Firestore
-      await createDocument('jobs', jobData);
       
       // Update local state
       await postJob(jobData);

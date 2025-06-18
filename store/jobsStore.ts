@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 import { Job } from '@/types';
 import { fetchLinkedInJobs } from '@/utils/mockData';
-import { collection, getDocs, query, orderBy, where, addDoc, serverTimestamp } from 'firebase/firestore';
-import { firestore } from '@/utils/firebase';
 
 interface JobsState {
   jobs: Job[];
@@ -72,7 +70,7 @@ export const useJobsStore = create<JobsState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
-      // Use mock data instead of Firestore
+      // Use mock data
       const linkedInJobs = await fetchLinkedInJobs();
       
       // Sort by priority first, then by date

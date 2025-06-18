@@ -25,7 +25,6 @@ import { useAuthStore } from '@/store/authStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import Colors from '@/constants/colors';
 import Button from '@/components/Button';
-import { logOut } from '@/utils/firebase';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -66,7 +65,6 @@ export default function ProfileScreen() {
 
   const handleLogout = async () => {
     try {
-      await logOut();
       logout();
       router.replace('/(auth)');
     } catch (error) {
