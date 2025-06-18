@@ -119,7 +119,7 @@ export default function AuthScreen() {
         setIsAuthenticated(true);
         router.replace('/(tabs)');
       }
-    } catch (error) {
+    } catch (error: any) {
       setErrors({
         ...errors,
         general: error.message || 'Authentication failed',
@@ -145,7 +145,7 @@ export default function AuthScreen() {
         ...errors,
         general: 'Password reset email sent. Please check your inbox.',
       });
-    } catch (error) {
+    } catch (error: any) {
       setErrors({
         ...errors,
         general: error.message || 'Failed to send reset email',
